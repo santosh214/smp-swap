@@ -55,6 +55,14 @@ export default function Home() {
   };
   function handleAccountsChanged(accounts) {
     let currentAccount;
+
+    console.log("accounts", window.ethereum.networkVersion == "56");
+    if (window.ethereum) {
+      if (window.ethereum.networkVersion !== "56") {
+        toast.error("Please connect to Binance Mainnet");
+      }
+    }
+
     if (accounts.length === 0) {
       // MetaMask is locked or the user has not connected any accounts
       // console.log("Please connect to MetaMask.");
@@ -79,11 +87,22 @@ export default function Home() {
   };
 
   const handleApprove = async () => {
-    if(!userAddress){
-      return toast.error("Metasmask not connected")
+    console.log("approve", parseInt(userSmpTokenBalance.toString()));
+    console.log("approve", parseInt(smpTokenValue.toString()));
+    // return null;
+    let balance = (userSmpTokenBalance / 10 ** 8).toString();
+    console.log("balance", balance);
+
+    if (!userAddress) {
+      return toast.error("Metasmask not connected");
     }
+
     if (smpTokenValue < 1) {
       return toast.error("SMP Token Value Should be greater then zero.");
+    }
+    if (parseInt(balance) < parseInt(smpTokenValue)) {
+      toast.error("You don't have enough SMP Token");
+      return null;
     }
     // console.log("handle approve", SmpToken);
     setApproveLoader(true);
@@ -127,12 +146,11 @@ export default function Home() {
       // console.log("buy", buy);
       let waitFortx = await buy.wait();
       if (waitFortx) {
-        toast.success("Buy Successful");
+        toast.success("Sell Successful!");
 
         setBuyLoader(false);
         setDisableInput(false);
         setTransferTrue(false);
-
       }
       // console.log("wait", waitFortx);
     } catch (error) {
@@ -335,7 +353,10 @@ export default function Home() {
                   {transferTrue === false ? (
                     <>
                       {approveLoader ? (
-                        <div className="spinner-border text-success" role="status">
+                        <div
+                          className="spinner-border text-success"
+                          role="status"
+                        >
                           <span className="visually-hidden">Loading...</span>
                         </div>
                       ) : (
@@ -350,15 +371,18 @@ export default function Home() {
                   ) : (
                     <>
                       {buyLoader ? (
-                        <div className="spinner-border text-success" role="status">
+                        <div
+                          className="spinner-border text-success"
+                          role="status"
+                        >
                           <span className="visually-hidden">Loading...</span>
                         </div>
                       ) : (
                         <button
-                          className="btn btn-success px-5"
+                          className="btn btn-danger px-5"
                           onClick={handleBuy}
                         >
-                          Buy
+                          sell
                         </button>
                       )}
                     </>
